@@ -131,23 +131,30 @@ class Client {
      * @throws RequestException
      */
     public function request($url, $method = 'GET', $body = null) {
-        $content = $body ? json_encode($body) : null;
+        $content = $body ? json_encode($body) : [];
 
         $headers = array();
         $headers[] = "X-DexiIO-Access: $this->accessKey";
         $headers[] = "X-DexiIO-Account: $this->accountId";
-        $headers[] = "User-Agent: $this->userAgent";
-        $headers[] = "Accept: application/json";
-        $headers[] = "Content-Type: application/json";
+        if ($method != 'GET')
+        {
+            $headers[] = "User-Agent: $this->userAgent";
+            $headers[] = "Accept: application/json";
+            $headers[] = "Content-Type: application/json";
+        }
 
         if ($content) {
             $headers[] = "Content-Length: " . strlen($content);
         }
 
         $ch = curl_init();
+        var_dump($this->endPoint . $url);
         curl_setopt($ch, CURLOPT_URL,$this->endPoint . $url);
-        curl_setopt($ch, CURLOPT_POST, $method == 'POST');
-        curl_setopt($ch,CURLOPT_POSTFIELDS, $content);
+        if ($method == 'POST')
+        {
+            curl_setopt($ch, CURLOPT_POST, $method == 'POST');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
+        }
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch,CURLOPT_TIMEOUT,$this->requestTimeout);
         curl_setopt($ch, CURLOPT_HEADER, 1);
